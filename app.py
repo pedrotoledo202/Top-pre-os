@@ -7,64 +7,306 @@ import streamlit as st
 # =========================
 # CONFIG GERAL + TEMA
 # =========================
-st.set_page_config(page_title="TOP Preços", page_icon="🔥", layout="wide")
+st.set_page_config(
+    page_title="TOP Preços", 
+    page_icon="🔥", 
+    layout="wide",
+    initial_sidebar_state="collapsed"  # Sidebar fechada por padrão no mobile
+)
 
-# Paleta
-ACCENT = "#ff7a1a"     # laranja
-BG     = "#0f0f11"     # fundo escuro
-CARD   = "#17181b"     # cartões
-TEXT   = "#f4f4f4"     # texto principal
-MUTED  = "#b9bcc2"     # texto secundário
+# Paleta moderna alaranjada
+PRIMARY = "#FF6B35"    # Laranja vibrante principal
+SECONDARY = "#FF8A5B"  # Laranja mais suave
+ACCENT = "#FFD23F"     # Amarelo dourado para destaques
+BG = "#1A1A1A"         # Fundo escuro principal
+CARD = "#2D2D2D"       # Cards com contraste suave
+TEXT = "#FFFFFF"       # Texto principal branco puro
+MUTED = "#B8B8B8"      # Texto secundário
+SUCCESS = "#4CAF50"    # Verde para menor preço
 
-# CSS: fonte grande + inputs + tabela + cards
+# CSS otimizado para mobile
 st.markdown(f"""
 <style>
 :root {{
+  --primary: {PRIMARY};
+  --secondary: {SECONDARY};
   --accent: {ACCENT};
   --bg: {BG};
   --card: {CARD};
   --text: {TEXT};
   --muted: {MUTED};
+  --success: {SUCCESS};
 }}
+
+/* Reset e base */
+* {{ box-sizing: border-box; }}
+
 html, body, [data-testid="stAppViewContainer"] {{
-  background: var(--bg) !important; color: var(--text) !important;
-}}
-/* Tipografia grande */
-body, div, p, span, label {{ font-size: 30px !important; color: var(--text); }}
-h1, h2, h3, h4 {{ font-size: 34px !important; font-weight: 800 !important; color: var(--text); }}
-
-/* Inputs */
-input, textarea, select {{
-  background: var(--card) !important; color: var(--text) !important;
-  border: 2px solid #2a2d33 !important; border-radius: 10px !important;
-}}
-input:focus, textarea:focus, select:focus {{
-  outline: none !important; border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px rgba(255,122,26,.25) !important;
+  background: var(--bg) !important; 
+  color: var(--text) !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }}
 
-/* DataFrame mais legível */
-.stDataFrame, .stDataFrame table {{ background: var(--card) !important; border-radius: 14px !important; }}
-.stDataFrame tbody td, .stDataFrame thead th {{ font-size: 30px !important; padding: 14px 16px !important; color: var(--text) !important; }}
-
-/* Largura total do conteúdo */
-section.main > div {{ max-width: 100% !important; padding-right: 24px; }}
-
-/* Cards (modo celular) */
-.card {{
-  background: var(--card); border: 1px solid #282b30; border-radius: 16px;
-  padding: 14px 16px; margin: 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,.35);
+/* Header customizado */
+.main-header {{
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
 }}
-.badge {{
-  display:inline-block; padding: 2px 10px; border-radius: 999px;
-  background: rgba(255,122,26,.18); color: var(--accent); font-weight: 700;
-  border: 1px solid rgba(255,122,26,.45); font-size: 26px;
-}}
-.value {{ font-weight: 800; color: var(--text); }}
-.muted {{ color: var(--muted); }}
 
-/* Sidebar */
-[data-testid="stSidebar"] {{ background: #121316 !important; border-right: 1px solid #24272d !important; }}
+.main-header h1 {{
+  color: white !important;
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}}
+
+.main-header .subtitle {{
+  color: rgba(255,255,255,0.9);
+  font-size: 1.1rem;
+  margin-top: 8px;
+  font-weight: 400;
+}}
+
+/* Search box melhorado */
+.search-container {{
+  background: var(--card);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  border: 2px solid rgba(255, 107, 53, 0.2);
+}}
+
+/* Input de busca estilizado */
+.stTextInput > div > div > input {{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border: 2px solid var(--primary) !important;
+  border-radius: 25px !important;
+  padding: 15px 20px !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+}}
+
+.stTextInput > div > div > input:focus {{
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
+  outline: none !important;
+}}
+
+/* Cards de produtos - design mobile-first */
+.product-card {{
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 15px 0;
+  border: 2px solid rgba(255, 107, 53, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}}
+
+.product-card::before {{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}}
+
+.product-card:hover {{
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(255, 107, 53, 0.2);
+  border-color: var(--primary);
+}}
+
+.product-name {{
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}}
+
+.supplier-info {{
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}}
+
+.supplier-label {{
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--primary);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 10px;
+  border: 1px solid rgba(255, 107, 53, 0.3);
+}}
+
+.supplier-name {{
+  color: var(--muted);
+  font-size: 1.05rem;
+  font-weight: 500;
+}}
+
+.price-container {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 107, 53, 0.1);
+  padding: 15px;
+  border-radius: 15px;
+  margin-top: 15px;
+}}
+
+.price-value {{
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}}
+
+.best-price {{
+  background: rgba(76, 175, 80, 0.15);
+  border: 2px solid var(--success);
+}}
+
+.best-price .price-value {{
+  color: var(--success);
+}}
+
+.best-badge {{
+  background: var(--success);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}}
+
+/* Stats container */
+.stats-container {{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}}
+
+.stat-card {{
+  background: var(--card);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  border: 2px solid rgba(255, 107, 53, 0.1);
+}}
+
+.stat-number {{
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  display: block;
+}}
+
+.stat-label {{
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 5px;
+}}
+
+/* Tabela melhorada para mobile */
+.stDataFrame {{
+  font-size: 0.9rem !important;
+}}
+
+.stDataFrame table {{
+  background: var(--card) !important;
+  border-radius: 15px !important;
+  overflow: hidden !important;
+}}
+
+.stDataFrame th {{
+  background: var(--primary) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 10px !important;
+  text-align: center !important;
+}}
+
+.stDataFrame td {{
+  padding: 12px 10px !important;
+  border-bottom: 1px solid rgba(255, 107, 53, 0.1) !important;
+  text-align: center !important;
+}}
+
+/* Sidebar customizada */
+.css-1d391kg {{
+  background: var(--card) !important;
+}}
+
+/* Selectbox e inputs da sidebar */
+.stSelectbox > div > div {{
+  background: var(--bg) !important;
+  border: 1px solid var(--primary) !important;
+  border-radius: 10px !important;
+}}
+
+/* Botões */
+.stButton > button {{
+  background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 25px !important;
+  padding: 12px 25px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}}
+
+.stButton > button:hover {{
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4) !important;
+}}
+
+/* Remover padding extra do container principal */
+.block-container {{
+  padding: 20px !important;
+  max-width: 100% !important;
+}}
+
+/* Responsividade mobile */
+@media (max-width: 768px) {{
+  .main-header h1 {{
+    font-size: 2rem !important;
+  }}
+  
+  .product-card {{
+    margin: 10px 0;
+    padding: 15px;
+  }}
+  
+  .price-value {{
+    font-size: 1.5rem;
+  }}
+  
+  .stats-container {{
+    grid-template-columns: repeat(2, 1fr);
+  }}
+}}
+
+/* Loading e mensagens */
+.stAlert {{
+  border-radius: 15px !important;
+  border-left: 4px solid var(--primary) !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -74,7 +316,7 @@ section.main > div {{ max-width: 100% !important; padding-right: 24px; }}
 DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=1318008819&single=true&output=csv"
 
 # =========================
-# Utils
+# Utils (mantidas suas funções originais)
 # =========================
 def format_brl(x):
     if pd.isna(x):
@@ -163,71 +405,146 @@ def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
         df = df.loc[df.groupby("__prod_norm")["Valor unitário"].idxmin()]
     return df
 
-def render_cards(df_view: pd.DataFrame):
-    """Exibe cada linha como um card (ótimo para celular)."""
+def render_cards_mobile(df_view: pd.DataFrame):
+    """Exibe cards otimizados para mobile com destaque para menores preços."""
+    # Identifica os menores preços por produto
+    min_prices = df_view.groupby("__prod_norm")["Valor unitário"].min().to_dict()
+    
     for _, row in df_view.iterrows():
-        st.markdown(
-            f"""
-            <div class="card">
-              <div class="badge">Produto</div><br>
-              <div class="value">{row['Produto']}</div>
-              <div class="muted" style="margin-top:6px;">Fornecedor</div>
-              <div>{row['Fornecedor']}</div>
-              <div class="muted" style="margin-top:6px;">Valor</div>
-              <div class="value">{format_brl(row['Valor unitário'])}</div>
+        produto_norm = row["__prod_norm"]
+        is_best_price = row["Valor unitário"] == min_prices.get(produto_norm, float('inf'))
+        
+        card_class = "product-card best-price" if is_best_price else "product-card"
+        
+        best_badge = '<span class="best-badge">Melhor Preço</span>' if is_best_price else ""
+        
+        st.markdown(f"""
+        <div class="{card_class}">
+            <div class="product-name">{row['Produto']}</div>
+            <div class="supplier-info">
+                <span class="supplier-label">Fornecedor</span>
+                <span class="supplier-name">{row['Fornecedor']}</span>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+            <div class="price-container">
+                <span class="price-value">{format_brl(row['Valor unitário'])}</span>
+                {best_badge}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # =========================
-# INTERFACE
+# INTERFACE PRINCIPAL
 # =========================
-st.markdown("## 🔥 TOP Preços")
 
-with st.sidebar:
-    st.markdown("### Opções")
-    modo_dup = st.selectbox(
-        "Tratamento de duplicados:",
-        ["Mostrar todos (sem idênticos)", "Um preço por fornecedor (menor)", "Apenas o menor preço de cada produto"],
-        index=1
-    )
-    visu = st.radio("Visualização", ["Tabela", "Cards (celular)"], index=0)
-    if st.button("Atualizar dados (limpar cache)"):
-        st.cache_data.clear()
-        st.experimental_rerun()
+# Header customizado
+st.markdown("""
+<div class="main-header">
+    <h1>🔥 TOP Preços</h1>
+    <div class="subtitle">Os melhores preços de panificação toda segunda-feira</div>
+</div>
+""", unsafe_allow_html=True)
 
 # Carrega dados
 try:
     df_raw = load_from_google_sheets(DATA_URL)
 except Exception as e:
-    st.error(f"Erro ao carregar dados do Google Sheets: {e}")
+    st.error(f"❌ Erro ao carregar dados: {e}")
     st.stop()
 
 # Limpa/deduplica
 try:
     df = padronizar_colunas(df_raw)
-    df = deduplicar(df, modo_dup)
+    df_original = df.copy()  # Guarda cópia para estatísticas
 except Exception as e:
-    st.error(f"Erro ao padronizar dados: {e}")
+    st.error(f"❌ Erro ao processar dados: {e}")
     st.write("Colunas encontradas:", list(df_raw.columns))
     st.stop()
 
-st.caption("Fonte: **Google Sheets (publicado como CSV)** — edite a planilha e o site reflete em ~2 min (ou use 'Atualizar dados').")
+# Sidebar com opções
+with st.sidebar:
+    st.markdown("### ⚙️ Configurações")
+    modo_dup = st.selectbox(
+        "Filtro de preços:",
+        ["Mostrar todos", "Um preço por fornecedor (menor)", "Apenas o menor preço de cada produto"],
+        index=1
+    )
+    visu = st.radio("Visualização:", ["Cards (Mobile)", "Tabela"], index=0)
+    
+    st.markdown("---")
+    if st.button("🔄 Atualizar Dados"):
+        st.cache_data.clear()
+        st.rerun()
 
-# Busca
-busca = st.text_input("Pesquisar produto", placeholder="Ex.: Farinha, Açúcar, Mussarela...")
-resultado = df[df["__prod_norm"].str.contains(norm(busca), na=False)] if busca else df.copy()
+# Aplica filtro de duplicatas
+df = deduplicar(df, modo_dup)
 
-# Exibição
-if resultado.empty:
-    st.info("Nenhum item encontrado para o termo buscado.")
+# Estatísticas rápidas
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.markdown(f"""
+    <div class="stat-card">
+        <span class="stat-number">{len(df)}</span>
+        <div class="stat-label">Produtos</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    fornecedores_unicos = df['Fornecedor'].nunique()
+    st.markdown(f"""
+    <div class="stat-card">
+        <span class="stat-number">{fornecedores_unicos}</span>
+        <div class="stat-label">Fornecedores</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    if not df.empty:
+        menor_preco = df['Valor unitário'].min()
+        st.markdown(f"""
+        <div class="stat-card">
+            <span class="stat-number">{format_brl(menor_preco)}</span>
+            <div class="stat-label">Menor Preço</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Container de busca
+st.markdown('<div class="search-container">', unsafe_allow_html=True)
+busca = st.text_input("🔍 Pesquisar produto", placeholder="Digite o nome do produto (ex: Farinha, Açúcar...)")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Filtra resultados
+if busca:
+    resultado = df[df["__prod_norm"].str.contains(norm(busca), na=False)]
 else:
-    if visu == "Tabela":
-        st.subheader("Tabela de preços")
+    resultado = df.copy()
+
+# Exibição dos resultados
+if resultado.empty:
+    st.markdown("""
+    <div style="text-align: center; padding: 40px; background: var(--card); border-radius: 15px; margin: 20px 0;">
+        <h3 style="color: var(--muted);">🔍 Nenhum produto encontrado</h3>
+        <p style="color: var(--muted);">Tente buscar por outro termo ou verifique a ortografia.</p>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    # Ordenar por produto e depois por preço
+    resultado = resultado.sort_values(['Produto', 'Valor unitário'])
+    
+    if visu == "Cards (Mobile)":
+        st.markdown(f"### 📋 Lista de Preços ({len(resultado)} itens)")
+        render_cards_mobile(resultado[["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]])
+    else:
+        st.markdown(f"### 📊 Tabela de Preços ({len(resultado)} itens)")
         tabela = resultado[["Produto", "Fornecedor", "Valor unitário"]].copy()
         tabela["Valor unitário"] = tabela["Valor unitário"].map(format_brl)
         st.dataframe(tabela, hide_index=True, use_container_width=True)
-    else:
-        st.subheader("Lista de preços")
-        render_cards(resultado[["Produto", "Fornecedor", "Valor unitário"]])
+
+# Footer informativo
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; color: var(--muted); padding: 20px;">
+    📊 Dados atualizados automaticamente do Google Sheets<br>
+    🔄 Última atualização em cache: 2 minutos<br>
+    📱 Interface otimizada para dispositivos móveis
+</div>
+""", unsafe_allow_html=True)
