@@ -78,7 +78,8 @@ html, body, [data-testid="stAppViewContainer"] {{
   padding: 20px;
   border-radius: 15px;
   margin-bottom: 25px;
-  border: 2px solid rgba(255, 107, 53, 0.2);
+  border: 1px solid rgba(255, 140, 66, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }}
 
 /* Input de busca estilizado */
@@ -252,8 +253,9 @@ html, body, [data-testid="stAppViewContainer"] {{
 }}
 
 /* Sidebar customizada */
-.css-1d391kg {{
+[data-testid="stSidebar"] {{
   background: var(--card) !important;
+  border-right: 1px solid rgba(255, 140, 66, 0.1) !important;
 }}
 
 /* Selectbox e inputs da sidebar */
@@ -261,6 +263,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   background: var(--bg) !important;
   border: 1px solid var(--primary) !important;
   border-radius: 10px !important;
+  color: var(--text) !important;
 }}
 
 /* Botões */
@@ -423,18 +426,22 @@ def render_cards_mobile(df_view: pd.DataFrame):
     
     for _, row in df_view.iterrows():
         # Verifica se tem coluna de economia
-        has_economy = "Potencial de economia" in row and pd.notna(row["Potencial de economia"])
-        economy_value = row["Potencial de economia"] if has_economy else None
+        has_economy = "Potencial de economia" in row.index and pd.notna(row.get("Potencial de economia"))
         
         economy_badge = ""
         card_class = "product-card"
         
-        if has_economy and economy_value:
+        if has_economy:
+            economy_value = row["Potencial de economia"]
             # Se tem valor de economia, mostra o badge com termômetro
             if isinstance(economy_value, str):
                 economy_display = economy_value
             else:
-                economy_display = format_brl(economy_value)
+                try:
+                    # Tenta formatar como valor monetário se for numérico
+                    economy_display = format_brl(float(economy_value))
+                except (ValueError, TypeError):
+                    economy_display = str(economy_value)
             
             economy_badge = f'<span class="economy-badge">🌡️ {economy_display}</span>'
             card_class = "product-card best-price"
