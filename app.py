@@ -14,15 +14,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"  # Sidebar fechada por padrão no mobile
 )
 
-# Paleta clean e clara
-PRIMARY = "#FF8C42"    # Laranja suave e clean
-SECONDARY = "#FFB366"  # Laranja mais claro
-ACCENT = "#FFA726"     # Laranja dourado para destaques
-BG = "#F8F9FA"         # Fundo claro e limpo
-CARD = "#FFFFFF"       # Cards brancos
-TEXT = "#2C3E50"       # Texto escuro para contraste
-MUTED = "#6C757D"      # Texto secundário cinza
-ECONOMY = "#E74C3C"    # Vermelho para indicar economia (termômetro)
+# Paleta moderna alaranjada
+PRIMARY = "#FF6B35"    # Laranja vibrante principal
+SECONDARY = "#FF8A5B"  # Laranja mais suave
+ACCENT = "#FFD23F"     # Amarelo dourado para destaques
+BG = "#1A1A1A"         # Fundo escuro principal
+CARD = "#2D2D2D"       # Cards com contraste suave
+TEXT = "#FFFFFF"       # Texto principal branco puro
+MUTED = "#B8B8B8"      # Texto secundário
+SUCCESS = "#4CAF50"    # Verde para menor preço
 
 # CSS otimizado para mobile
 st.markdown(f"""
@@ -35,7 +35,7 @@ st.markdown(f"""
   --card: {CARD};
   --text: {TEXT};
   --muted: {MUTED};
-  --economy: {ECONOMY};
+  --success: {SUCCESS};
 }}
 
 /* Reset e base */
@@ -54,7 +54,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   border-radius: 15px;
   margin-bottom: 25px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(255, 140, 66, 0.2);
+  box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
 }}
 
 .main-header h1 {{
@@ -78,8 +78,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   padding: 20px;
   border-radius: 15px;
   margin-bottom: 25px;
-  border: 1px solid rgba(255, 140, 66, 0.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 2px solid rgba(255, 107, 53, 0.2);
 }}
 
 /* Input de busca estilizado */
@@ -102,11 +101,11 @@ html, body, [data-testid="stAppViewContainer"] {{
 /* Cards de produtos - design mobile-first */
 .product-card {{
   background: var(--card);
-  border-radius: 15px;
+  border-radius: 20px;
   padding: 20px;
   margin: 15px 0;
-  border: 1px solid rgba(255, 140, 66, 0.15);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 107, 53, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -118,13 +117,13 @@ html, body, [data-testid="stAppViewContainer"] {{
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
   background: linear-gradient(90deg, var(--primary), var(--accent));
 }}
 
 .product-card:hover {{
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(255, 140, 66, 0.15);
+  box-shadow: 0 12px 40px rgba(255, 107, 53, 0.2);
   border-color: var(--primary);
 }}
 
@@ -143,14 +142,14 @@ html, body, [data-testid="stAppViewContainer"] {{
 }}
 
 .supplier-label {{
-  background: rgba(255, 140, 66, 0.1);
+  background: rgba(255, 107, 53, 0.15);
   color: var(--primary);
   padding: 5px 12px;
-  border-radius: 15px;
+  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
   margin-right: 10px;
-  border: 1px solid rgba(255, 140, 66, 0.2);
+  border: 1px solid rgba(255, 107, 53, 0.3);
 }}
 
 .supplier-name {{
@@ -163,9 +162,9 @@ html, body, [data-testid="stAppViewContainer"] {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 140, 66, 0.08);
+  background: rgba(255, 107, 53, 0.1);
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 15px;
   margin-top: 15px;
 }}
 
@@ -177,24 +176,22 @@ html, body, [data-testid="stAppViewContainer"] {{
 }}
 
 .best-price {{
-  background: rgba(231, 76, 60, 0.05);
-  border: 1px solid rgba(231, 76, 60, 0.2);
+  background: rgba(76, 175, 80, 0.15);
+  border: 2px solid var(--success);
 }}
 
 .best-price .price-value {{
-  color: var(--primary);
+  color: var(--success);
 }}
 
-.economy-badge {{
-  background: var(--economy);
+.best-badge {{
+  background: var(--success);
   color: white;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.85rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  text-transform: uppercase;
 }}
 
 /* Stats container */
@@ -208,10 +205,9 @@ html, body, [data-testid="stAppViewContainer"] {{
 .stat-card {{
   background: var(--card);
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 15px;
   text-align: center;
-  border: 1px solid rgba(255, 140, 66, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 2px solid rgba(255, 107, 53, 0.1);
 }}
 
 .stat-number {{
@@ -248,14 +244,13 @@ html, body, [data-testid="stAppViewContainer"] {{
 
 .stDataFrame td {{
   padding: 12px 10px !important;
-  border-bottom: 1px solid rgba(255, 140, 66, 0.1) !important;
+  border-bottom: 1px solid rgba(255, 107, 53, 0.1) !important;
   text-align: center !important;
 }}
 
 /* Sidebar customizada */
-[data-testid="stSidebar"] {{
+.css-1d391kg {{
   background: var(--card) !important;
-  border-right: 1px solid rgba(255, 140, 66, 0.1) !important;
 }}
 
 /* Selectbox e inputs da sidebar */
@@ -263,7 +258,6 @@ html, body, [data-testid="stAppViewContainer"] {{
   background: var(--bg) !important;
   border: 1px solid var(--primary) !important;
   border-radius: 10px !important;
-  color: var(--text) !important;
 }}
 
 /* Botões */
@@ -279,7 +273,7 @@ html, body, [data-testid="stAppViewContainer"] {{
 
 .stButton > button:hover {{
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3) !important;
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4) !important;
 }}
 
 /* Remover padding extra do container principal */
@@ -375,21 +369,11 @@ def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
     c_prod = pick("produto")
     c_forn = pick("fornecedor")
     c_val  = pick("valor unitário", "valor unitario", "preço", "preco", "valor")
-    c_econ = pick("potencial de economia", "economia", "potencial economia")
-    
     if not all([c_prod, c_forn, c_val]):
         raise ValueError("Esperava colunas: Produto, Fornecedor, Valor unitário.")
 
-    # Inclui coluna de economia se existir
-    cols_to_keep = [c_prod, c_forn, c_val]
-    col_names = ["Produto", "Fornecedor", "Valor unitário"]
-    
-    if c_econ:
-        cols_to_keep.append(c_econ)
-        col_names.append("Potencial de economia")
-
-    df = df[cols_to_keep].copy()
-    df.columns = col_names
+    df = df[[c_prod, c_forn, c_val]].copy()
+    df.columns = ["Produto", "Fornecedor", "Valor unitário"]
     df = df.dropna(subset=["Produto", "Fornecedor", "Valor unitário"])
 
     # "R$ 1.234,56" -> 1234.56
@@ -422,29 +406,17 @@ def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
     return df
 
 def render_cards_mobile(df_view: pd.DataFrame):
-    """Exibe cards otimizados para mobile com potencial de economia."""
+    """Exibe cards otimizados para mobile com destaque para menores preços."""
+    # Identifica os menores preços por produto
+    min_prices = df_view.groupby("__prod_norm")["Valor unitário"].min().to_dict()
     
     for _, row in df_view.iterrows():
-        # Verifica se tem coluna de economia
-        has_economy = "Potencial de economia" in row.index and pd.notna(row.get("Potencial de economia"))
+        produto_norm = row["__prod_norm"]
+        is_best_price = row["Valor unitário"] == min_prices.get(produto_norm, float('inf'))
         
-        economy_badge = ""
-        card_class = "product-card"
+        card_class = "product-card best-price" if is_best_price else "product-card"
         
-        if has_economy:
-            economy_value = row["Potencial de economia"]
-            # Se tem valor de economia, mostra o badge com termômetro
-            if isinstance(economy_value, str):
-                economy_display = economy_value
-            else:
-                try:
-                    # Tenta formatar como valor monetário se for numérico
-                    economy_display = format_brl(float(economy_value))
-                except (ValueError, TypeError):
-                    economy_display = str(economy_value)
-            
-            economy_badge = f'<span class="economy-badge">🌡️ {economy_display}</span>'
-            card_class = "product-card best-price"
+        best_badge = '<span class="best-badge">Melhor Preço</span>' if is_best_price else ""
         
         st.markdown(f"""
         <div class="{card_class}">
@@ -455,7 +427,7 @@ def render_cards_mobile(df_view: pd.DataFrame):
             </div>
             <div class="price-container">
                 <span class="price-value">{format_brl(row['Valor unitário'])}</span>
-                {economy_badge}
+                {best_badge}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -560,27 +532,11 @@ else:
     
     if visu == "Cards (Mobile)":
         st.markdown(f"### 📋 Lista de Preços ({len(resultado)} itens)")
-        # Inclui todas as colunas disponíveis para os cards
-        cols_to_show = ["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]
-        if "Potencial de economia" in resultado.columns:
-            cols_to_show.insert(-1, "Potencial de economia")  # Antes da coluna __prod_norm
-        render_cards_mobile(resultado[cols_to_show])
+        render_cards_mobile(resultado[["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]])
     else:
         st.markdown(f"### 📊 Tabela de Preços ({len(resultado)} itens)")
-        # Para tabela, mostra todas as colunas exceto as normalizadas
-        display_cols = ["Produto", "Fornecedor", "Valor unitário"]
-        if "Potencial de economia" in resultado.columns:
-            display_cols.append("Potencial de economia")
-        
-        tabela = resultado[display_cols].copy()
+        tabela = resultado[["Produto", "Fornecedor", "Valor unitário"]].copy()
         tabela["Valor unitário"] = tabela["Valor unitário"].map(format_brl)
-        
-        # Formatar coluna de economia se existir
-        if "Potencial de economia" in tabela.columns:
-            tabela["Potencial de economia"] = tabela["Potencial de economia"].apply(
-                lambda x: format_brl(x) if pd.notna(x) and isinstance(x, (int, float)) else str(x) if pd.notna(x) else "-"
-            )
-        
         st.dataframe(tabela, hide_index=True, use_container_width=True)
 
 # Footer informativo
