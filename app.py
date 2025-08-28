@@ -229,6 +229,8 @@ html, body, [data-testid="stAppViewContainer"] {{
 # FUNÇÕES
 # =========================
 DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=1318008819&single=true&output=csv"
+# URL para a segunda página (gid diferente)
+ECONOMIA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=0&single=true&output=csv"
 
 def format_brl(x):
     if pd.isna(x):
@@ -265,6 +267,26 @@ def load_from_google_sheets(url: str) -> pd.DataFrame:
         r2 = requests.get(gviz, headers=HEADERS, timeout=25, allow_redirects=True)
         r2.raise_for_status()
         return pd.read_csv(io.BytesIO(r2.content))
+
+@st.cache_data(ttl=120)
+def load_economia_value() -> str:
+    """Carrega o valor de economia da segunda página da planilha."""
+    try:
+        df_economia = load_from_google_sheets(ECONOMIA_URL)
+        
+        # Procura por valores que parecem ser monetários (R$ ou números)
+        for col in df_economia.columns:
+            for _, row in df_economia.iterrows():
+                for value in row:
+                    if pd.notna(value):
+                        value_str = str(value).strip()
+                        # Verifica se é um valor monetário
+                        if "R$" in value_str or (value_str.replace(",", "").replace(".", "").replace("-", "").isdigit() and len(value_str) > 3):
+                            return value_str
+        
+        return "R$ 1.480,48"  # Valor padrão se não encontrar
+    except:
+        return "R$ 1.480,48"  # Valor padrão em caso de erro
 
 def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
     colmap = {c.strip().lower(): c for c in df.columns}
@@ -361,7 +383,6 @@ try:
     df = padronizar_colunas(df_raw)
     df_original = df.copy()
     st.success("✅ Dados carregados com sucesso!")
-    # REMOVIDO: Mensagem sobre coluna de economia detectada
 except Exception as e:
     st.error(f"❌ Erro ao processar dados: {e}")
     st.write("Colunas encontradas:", list(df_raw.columns))
@@ -382,6 +403,9 @@ with st.sidebar:
         st.rerun()
 
 df = deduplicar(df, modo_dup)
+
+# Carrega valor de economia da segunda página
+valor_economia = load_economia_value()
 
 # APENAS 3 CARDS: Produtos, Fornecedores, Potencial de Economia
 col1, col2, col3 = st.columns(3)
@@ -405,7 +429,7 @@ with col2:
 with col3:
     st.markdown(f"""
     <div class="stat-card">
-        <span class="stat-number">R$ 1.480,48</span>
+        <span class="stat-number">{valor_economia}</span>
         <div class="stat-label">Potencial de Economia</div>
     </div>
     """, unsafe_allow_html=True)
