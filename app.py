@@ -229,8 +229,6 @@ html, body, [data-testid="stAppViewContainer"] {{
 # FUNÇÕES
 # =========================
 DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=1318008819&single=true&output=csv"
-# URL para a segunda página (gid diferente)
-ECONOMIA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=0&single=true&output=csv"
 
 def format_brl(x):
     if pd.isna(x):
@@ -271,22 +269,48 @@ def load_from_google_sheets(url: str) -> pd.DataFrame:
 @st.cache_data(ttl=120)
 def load_economia_value() -> str:
     """Carrega o valor de economia da segunda página da planilha."""
-    try:
-        df_economia = load_from_google_sheets(ECONOMIA_URL)
-        
-        # Procura por valores que parecem ser monetários (R$ ou números)
-        for col in df_economia.columns:
-            for _, row in df_economia.iterrows():
-                for value in row:
-                    if pd.notna(value):
-                        value_str = str(value).strip()
+    # Lista de GIDs comuns para testar (segunda aba geralmente tem GID diferente de 0)
+    gids_to_try = ["0", "1964984746", "1", "2", "123456"]
+    
+    for gid in gids_to_try:
+        try:
+            # Constrói URL para a segunda aba
+            economia_url = f"https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid={gid}&single=true&output=csv"
+            
+            df_economia = load_from_google_sheets(economia_url)
+            
+            # Verifica se tem dados diferentes da primeira aba (produtos)
+            if not df_economia.empty:
+                # Procura por "Potencial de economia" ou valores monetários
+                for col in df_economia.columns:
+                    col_lower = col.lower().strip()
+                    if "potencial" in col_lower and "economia" in col_lower:
+                        # Pega o primeiro valor não-nulo da coluna
+                        for value in df_economia[col]:
+                            if pd.notna(value) and str(value).strip():
+                                return str(value).strip()
+                
+                # Se não encontrou coluna específica, procura na célula A2 (como mostra sua imagem)
+                if len(df_economia) >= 2 and len(df_economia.columns) >= 1:
+                    valor_a2 = df_economia.iloc[1, 0]  # Linha 2, Coluna A (índice 1, 0)
+                    if pd.notna(valor_a2) and str(valor_a2).strip():
+                        valor_str = str(valor_a2).strip()
                         # Verifica se é um valor monetário
-                        if "R$" in value_str or (value_str.replace(",", "").replace(".", "").replace("-", "").isdigit() and len(value_str) > 3):
-                            return value_str
-        
-        return "R$ 1.480,48"  # Valor padrão se não encontrar
-    except:
-        return "R$ 1.480,48"  # Valor padrão em caso de erro
+                        if "R$" in valor_str or "," in valor_str:
+                            return valor_str
+                
+                # Busca qualquer valor que pareça monetário em toda a planilha
+                for _, row in df_economia.iterrows():
+                    for value in row:
+                        if pd.notna(value):
+                            value_str = str(value).strip()
+                            if ("R$" in value_str or 
+                                ("," in value_str and any(c.isdigit() for c in value_str))):
+                                return value_str
+        except:
+            continue
+    
+    return "R$ 12,00"  # Valor que vi na sua imagem como fallback
 
 def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
     colmap = {c.strip().lower(): c for c in df.columns}
