@@ -14,15 +14,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"  # Sidebar fechada por padrão no mobile
 )
 
-# Paleta ultra suave e clara
-PRIMARY = "#FFB366"    # Laranja muito suave
-SECONDARY = "#FFD4B3"  # Laranja pastel
-ACCENT = "#FFE5CC"     # Laranja quase bege
-BG = "#1C1C1C"         # Fundo quase preto
-CARD = "#FFFFFF"       # Cards brancos puros
+# Paleta alaranjada harmoniosa com fundo escuro
+PRIMARY = "#FF8C42"    # Laranja vibrante principal
+SECONDARY = "#FFB366"  # Laranja dourado médio
+ACCENT = "#FFA726"     # Laranja âmbar para destaques
+BG = "#1C1C1C"         # Fundo escuro (mantido)
+CARD = "#2A2A2A"       # Cards em cinza escuro para contraste suave
 TEXT = "#FFFFFF"       # Texto branco
-MUTED = "#8A8A8A"      # Texto ainda mais suave
-ECONOMY = "#FF9A76"    # Laranja coral suave para economia
+MUTED = "#B0B0B0"      # Texto mais suave em cinza claro
+ECONOMY = "#FF7043"    # Laranja coral para economia
 
 # CSS otimizado para mobile
 st.markdown(f"""
@@ -105,8 +105,8 @@ html, body, [data-testid="stAppViewContainer"] {{
   border-radius: 12px;
   padding: 20px;
   margin: 15px 0;
-  border: 1px solid rgba(255, 179, 102, 0.1);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 140, 66, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -118,13 +118,13 @@ html, body, [data-testid="stAppViewContainer"] {{
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(90deg, var(--primary), var(--secondary));
 }}
 
 .product-card:hover {{
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(255, 179, 102, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.4);
   border-color: var(--primary);
 }}
 
@@ -143,14 +143,14 @@ html, body, [data-testid="stAppViewContainer"] {{
 }}
 
 .supplier-label {{
-  background: rgba(255, 179, 102, 0.08);
+  background: rgba(255, 140, 66, 0.15);
   color: var(--primary);
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 5px 12px;
+  border-radius: 15px;
   font-size: 0.85rem;
   font-weight: 600;
   margin-right: 10px;
-  border: 1px solid rgba(255, 179, 102, 0.15);
+  border: 1px solid rgba(255, 140, 66, 0.3);
 }}
 
 .supplier-name {{
@@ -163,9 +163,9 @@ html, body, [data-testid="stAppViewContainer"] {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 179, 102, 0.05);
+  background: rgba(255, 140, 66, 0.1);
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-top: 15px;
 }}
 
@@ -174,15 +174,6 @@ html, body, [data-testid="stAppViewContainer"] {{
   font-weight: 800;
   color: var(--primary);
   text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-}}
-
-.best-price {{
-  background: rgba(255, 154, 118, 0.03);
-  border: 1px solid rgba(255, 154, 118, 0.1);
-}}
-
-.best-price .price-value {{
-  color: var(--primary);
 }}
 
 .economy-badge {{
@@ -208,10 +199,10 @@ html, body, [data-testid="stAppViewContainer"] {{
 .stat-card {{
   background: var(--card);
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
-  border: 1px solid rgba(255, 179, 102, 0.08);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(255, 140, 66, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }}
 
 .stat-number {{
@@ -390,6 +381,7 @@ def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df[cols_to_keep].copy()
     df.columns = col_names
+    
     # Processamento da coluna economia se existir
     if "Potencial de economia" in df.columns:
         # Limpa e converte valores de economia
@@ -418,31 +410,39 @@ def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
 def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
     """Remove duplicatas de acordo com a estratégia escolhida."""
     # remove linhas idênticas (produto+fornecedor+valor)
-    df = df.drop_duplicates(subset=["__prod_norm", "__forn_norm", "Valor unitário"], keep="first")
+    df = df.drop_duplicates(subset=["_prod_norm", "_forn_norm", "Valor unitário"], keep="first")
 
     if modo == "Um preço por fornecedor (menor)":
         df = df.sort_values("Valor unitário").drop_duplicates(
-            subset=["__prod_norm", "__forn_norm"], keep="first"
+            subset=["_prod_norm", "_forn_norm"], keep="first"
         )
     elif modo == "Apenas o menor preço de cada produto":
         df = df.loc[df.groupby("__prod_norm")["Valor unitário"].idxmin()]
     return df
 
 def render_cards_mobile(df_view: pd.DataFrame):
-    """Exibe cards otimizados para mobile com destaque para menores preços."""
-    # Identifica os menores preços por produto
-    min_prices = df_view.groupby("__prod_norm")["Valor unitário"].min().to_dict()
+    """Exibe cards otimizados para mobile com potencial de economia."""
     
     for _, row in df_view.iterrows():
-        produto_norm = row["__prod_norm"]
-        is_best_price = row["Valor unitário"] == min_prices.get(produto_norm, float('inf'))
+        # Verifica se tem coluna de economia
+        has_economy = "Potencial de economia" in row.index and pd.notna(row.get("Potencial de economia"))
+        economy_value = row.get("Potencial de economia", "") if has_economy else ""
         
-        card_class = "product-card best-price" if is_best_price else "product-card"
-        
-        best_badge = '<span class="economy-badge">🏆 Melhor Preço</span>' if is_best_price else ""
+        # Badge de economia (se existir)
+        economy_badge = ""
+        if has_economy and economy_value and str(economy_value).strip():
+            # Se é um valor numérico, formata como moeda
+            try:
+                if isinstance(economy_value, (int, float)) or str(economy_value).replace(",", ".").replace("R$", "").strip().replace(".", "").isdigit():
+                    economy_badge = f'<span class="economy-badge">🌡 {format_brl(float(str(economy_value).replace("R$", "").replace(",", ".")))}</span>'
+                else:
+                    # Se é texto descritivo
+                    economy_badge = f'<span class="economy-badge">🌡 {economy_value}</span>'
+            except:
+                economy_badge = f'<span class="economy-badge">🌡 {economy_value}</span>'
         
         st.markdown(f"""
-        <div class="{card_class}">
+        <div class="product-card">
             <div class="product-name">{row['Produto']}</div>
             <div class="supplier-info">
                 <span class="supplier-label">Fornecedor</span>
@@ -450,7 +450,7 @@ def render_cards_mobile(df_view: pd.DataFrame):
             </div>
             <div class="price-container">
                 <span class="price-value">{format_brl(row['Valor unitário'])}</span>
-                {best_badge}
+                {economy_badge}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -480,7 +480,7 @@ try:
     df_original = df.copy()  # Guarda cópia para estatísticas
     st.success("✅ Dados carregados com sucesso!")
     if "Potencial de economia" in df.columns:
-        st.info("🌡️ Coluna 'Potencial de economia' detectada!")
+        st.info("🌡 Coluna 'Potencial de economia' detectada!")
 except Exception as e:
     st.error(f"❌ Erro ao processar dados: {e}")
     st.write("Colunas encontradas:", list(df_raw.columns))
@@ -488,7 +488,7 @@ except Exception as e:
 
 # Sidebar com opções
 with st.sidebar:
-    st.markdown("### ⚙️ Configurações")
+    st.markdown("### ⚙ Configurações")
     modo_dup = st.selectbox(
         "Filtro de preços:",
         ["Mostrar todos", "Um preço por fornecedor (menor)", "Apenas o menor preço de cada produto"],
@@ -567,7 +567,11 @@ else:
     
     if visu == "Cards (Mobile)":
         st.markdown(f"### 📋 Lista de Preços ({len(resultado)} itens)")
-        render_cards_mobile(resultado[["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]])
+        # Inclui todas as colunas disponíveis para os cards
+        cols_to_show = ["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]
+        if "Potencial de economia" in resultado.columns:
+            cols_to_show.append("Potencial de economia")
+        render_cards_mobile(resultado[cols_to_show])
     else:
         st.markdown(f"### 📊 Tabela de Preços ({len(resultado)} itens)")
         # Para tabela, mostra apenas as colunas básicas
