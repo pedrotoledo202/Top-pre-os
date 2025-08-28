@@ -429,32 +429,17 @@ def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
     return df
 
 def render_cards_mobile(df_view: pd.DataFrame):
-    """Exibe cards otimizados para mobile com potencial de economia."""
+    """Exibe cards otimizados para mobile com destaque para menores preços."""
+    # Identifica os menores preços por produto
+    min_prices = df_view.groupby("__prod_norm")["Valor unitário"].min().to_dict()
     
     for _, row in df_view.iterrows():
-        # Sempre mostra o badge de economia, mesmo se vazio
-        has_economy_column = "Potencial de economia" in row.index
-        economy_value = row.get("Potencial de economia", "") if has_economy_column else ""
+        produto_norm = row["__prod_norm"]
+        is_best_price = row["Valor unitário"] == min_prices.get(produto_norm, float('inf'))
         
-        # Se tem a coluna mas está vazio, mostra "A definir"
-        if has_economy_column:
-            if pd.isna(economy_value) or str(economy_value).strip() == "" or str(economy_value).lower() == 'nan':
-                economy_display = "A definir"
-            else:
-                # Se tem valor, formata adequadamente
-                if isinstance(economy_value, str):
-                    economy_display = economy_value
-                else:
-                    try:
-                        economy_display = format_brl(float(economy_value))
-                    except (ValueError, TypeError):
-                        economy_display = str(economy_value)
-            
-            economy_badge = f'<span class="economy-badge">🌡️ {economy_display}</span>'
-            card_class = "product-card best-price"
-        else:
-            economy_badge = ""
-            card_class = "product-card"
+        card_class = "product-card best-price" if is_best_price else "product-card"
+        
+        best_badge = '<span class="economy-badge">🏆 Melhor Preço</span>' if is_best_price else ""
         
         st.markdown(f"""
         <div class="{card_class}">
@@ -465,7 +450,7 @@ def render_cards_mobile(df_view: pd.DataFrame):
             </div>
             <div class="price-container">
                 <span class="price-value">{format_brl(row['Valor unitário'])}</span>
-                {economy_badge}
+                {best_badge}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -549,22 +534,13 @@ with col3:
         """, unsafe_allow_html=True)
 
 with col4:
-    # Novo card para Potencial de Economia
-    if "Potencial de economia" in df.columns:
-        economia_preenchida = df['Potencial de economia'].notna().sum()
-        st.markdown(f"""
-        <div class="stat-card">
-            <span class="stat-number">🌡️ {economia_preenchida}</span>
-            <div class="stat-label">Potencial de Economia</div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div class="stat-card">
-            <span class="stat-number">🌡️ 0</span>
-            <div class="stat-label">Potencial de Economia</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # Card de Potencial de Economia com valor fixo
+    st.markdown(f"""
+    <div class="stat-card">
+        <span class="stat-number">R$ 1.480,48</span>
+        <div class="stat-label">Potencial de Economia</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Container de busca
 st.markdown('<div class="search-container">', unsafe_allow_html=True)
@@ -591,27 +567,13 @@ else:
     
     if visu == "Cards (Mobile)":
         st.markdown(f"### 📋 Lista de Preços ({len(resultado)} itens)")
-        # Inclui todas as colunas disponíveis para os cards
-        cols_to_show = ["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]
-        if "Potencial de economia" in resultado.columns:
-            cols_to_show.insert(-1, "Potencial de economia")  # Antes da coluna __prod_norm
-        render_cards_mobile(resultado[cols_to_show])
+        render_cards_mobile(resultado[["Produto", "Fornecedor", "Valor unitário", "__prod_norm"]])
     else:
         st.markdown(f"### 📊 Tabela de Preços ({len(resultado)} itens)")
-        # Para tabela, mostra todas as colunas exceto as normalizadas
+        # Para tabela, mostra apenas as colunas básicas
         display_cols = ["Produto", "Fornecedor", "Valor unitário"]
-        if "Potencial de economia" in resultado.columns:
-            display_cols.append("Potencial de economia")
-        
         tabela = resultado[display_cols].copy()
         tabela["Valor unitário"] = tabela["Valor unitário"].map(format_brl)
-        
-        # Formatar coluna de economia se existir
-        if "Potencial de economia" in tabela.columns:
-            tabela["Potencial de economia"] = tabela["Potencial de economia"].apply(
-                lambda x: format_brl(x) if pd.notna(x) and isinstance(x, (int, float)) else str(x) if pd.notna(x) else "-"
-            )
-        
         st.dataframe(tabela, hide_index=True, use_container_width=True)
 
 # Footer informativo
