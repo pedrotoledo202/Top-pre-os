@@ -171,8 +171,8 @@ html, body, [data-testid="stAppViewContainer"] {{
   text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }}
 
-.economy-badge {{
-  background: var(--economy);
+.check-badge {{
+  background: #28a745;
   color: white;
   padding: 5px 10px;
   border-radius: 12px;
@@ -314,7 +314,6 @@ def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
-    # CORRIGIDO: Usar nomes de colunas que existem
     df = df.drop_duplicates(subset=["produto_norm", "fornecedor_norm", "Valor unitário"], keep="first")
 
     if modo == "Um preço por fornecedor (menor)":
@@ -327,19 +326,6 @@ def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
 
 def render_cards_mobile(df_view: pd.DataFrame):
     for _, row in df_view.iterrows():
-        has_economy = "Potencial de economia" in row.index and pd.notna(row.get("Potencial de economia"))
-        economy_value = row.get("Potencial de economia", "") if has_economy else ""
-        
-        economy_badge = ""
-        if has_economy and economy_value and str(economy_value).strip():
-            try:
-                if isinstance(economy_value, (int, float)) or str(economy_value).replace(",", ".").replace("R$", "").strip().replace(".", "").isdigit():
-                    economy_badge = f'<span class="economy-badge">🌡 {format_brl(float(str(economy_value).replace("R$", "").replace(",", ".")))}</span>'
-                else:
-                    economy_badge = f'<span class="economy-badge">🌡 {economy_value}</span>'
-            except:
-                economy_badge = f'<span class="economy-badge">🌡 {economy_value}</span>'
-        
         st.markdown(f"""
         <div class="product-card">
             <div class="product-name">{row['Produto']}</div>
@@ -349,7 +335,7 @@ def render_cards_mobile(df_view: pd.DataFrame):
             </div>
             <div class="price-container">
                 <span class="price-value">{format_brl(row['Valor unitário'])}</span>
-                {economy_badge}
+                <span class="check-badge">✅ Disponível</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -375,8 +361,7 @@ try:
     df = padronizar_colunas(df_raw)
     df_original = df.copy()
     st.success("✅ Dados carregados com sucesso!")
-    if "Potencial de economia" in df.columns:
-        st.info("🌡 Coluna 'Potencial de economia' detectada!")
+    # REMOVIDO: Mensagem sobre coluna de economia detectada
 except Exception as e:
     st.error(f"❌ Erro ao processar dados: {e}")
     st.write("Colunas encontradas:", list(df_raw.columns))
@@ -398,7 +383,8 @@ with st.sidebar:
 
 df = deduplicar(df, modo_dup)
 
-col1, col2, col3, col4 = st.columns(4)
+# APENAS 3 CARDS: Produtos, Fornecedores, Potencial de Economia
+col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown(f"""
     <div class="stat-card">
@@ -417,16 +403,6 @@ with col2:
     """, unsafe_allow_html=True)
 
 with col3:
-    if not df.empty:
-        menor_preco = df['Valor unitário'].min()
-        st.markdown(f"""
-        <div class="stat-card">
-            <span class="stat-number">{format_brl(menor_preco)}</span>
-            <div class="stat-label">Menor Preço</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-with col4:
     st.markdown(f"""
     <div class="stat-card">
         <span class="stat-number">R$ 1.480,48</span>
@@ -455,10 +431,7 @@ else:
     
     if visu == "Cards (Mobile)":
         st.markdown(f"### 📋 Lista de Preços ({len(resultado)} itens)")
-        cols_to_show = ["Produto", "Fornecedor", "Valor unitário"]
-        if "Potencial de economia" in resultado.columns:
-            cols_to_show.append("Potencial de economia")
-        render_cards_mobile(resultado[cols_to_show])
+        render_cards_mobile(resultado[["Produto", "Fornecedor", "Valor unitário"]])
     else:
         st.markdown(f"### 📊 Tabela de Preços ({len(resultado)} itens)")
         display_cols = ["Produto", "Fornecedor", "Valor unitário"]
