@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # Paleta ultra suave e clara
-PRIMARY = "#000000"    # preto
+PRIMARY = "#FFB366"    # Laranja muito suave
 SECONDARY = "#FFD4B3"  # Laranja pastel
 ACCENT = "#FFE5CC"     # Laranja quase bege
 BG = "#1C1C1C"         # Fundo quase preto
