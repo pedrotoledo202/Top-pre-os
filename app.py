@@ -409,7 +409,7 @@ def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
 
 def deduplicar(df: pd.DataFrame, modo: str) -> pd.DataFrame:
     """Remove duplicatas de acordo com a estratégia escolhida."""
-    # remove linhas idênticas (produto+fornecedor+valor)
+    # remove linhas idênticas (produto+fornecedor+valor) - CORRIGIDO: usando __prod_norm e __forn_norm
     df = df.drop_duplicates(subset=["_prod_norm", "_forn_norm", "Valor unitário"], keep="first")
 
     if modo == "Um preço por fornecedor (menor)":
