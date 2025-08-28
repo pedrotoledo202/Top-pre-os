@@ -15,12 +15,11 @@ st.set_page_config(
 )
 
 # Paleta ultra suave e clara
-PRIMARY = "#FFB366"    # Laranja muito suave
+PRIMARY = "#000000"    # preto
 SECONDARY = "#FFD4B3"  # Laranja pastel
 ACCENT = "#FFE5CC"     # Laranja quase bege
 BG = "#1C1C1C"         # Fundo quase preto
-CARD = "#FFD4B3"       # Cards Laranja pastel
-TEXT = "#FEFEFE"       # Texto branco
+CARD = "#FFE5CC"       # Cards Laranja quase bege
 MUTED = "#8A8A8A"      # Texto ainda mais suave
 ECONOMY = "#FF9A76"    # Laranja coral suave para economia
 
