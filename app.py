@@ -19,7 +19,8 @@ PRIMARY = "#FFB366"    # Laranja muito suave
 SECONDARY = "#FFD4B3"  # Laranja pastel
 ACCENT = "#FFE5CC"     # Laranja quase bege
 BG = "#1C1C1C"         # Fundo quase preto
-CARD = "#FFE5CC"       # Cards Laranja quase bege
+CARD = "#FFFFFF"       # Cards brancos puros
+TEXT = "#FFFFFF"       # Texto branco
 MUTED = "#8A8A8A"      # Texto ainda mais suave
 ECONOMY = "#FF9A76"    # Laranja coral suave para economia
 
