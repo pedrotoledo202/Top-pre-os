@@ -183,26 +183,45 @@ html, body, [data-testid="stAppViewContainer"] {{
   gap: 4px;
 }}
 
-.stat-card {{
+/* Card principal de economia centralizado */
+.main-stat-card {{
   background: var(--card);
-  padding: 20px;
-  border-radius: 12px;
+  padding: 40px;
+  border-radius: 20px;
   text-align: center;
-  border: 1px solid rgba(255, 140, 66, 0.2);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 140, 66, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 140, 66, 0.15);
+  margin: 30px auto;
+  max-width: 400px;
+  position: relative;
+  overflow: hidden;
 }}
 
-.stat-number {{
-  font-size: 2rem;
-  font-weight: 800;
+.main-stat-card::before {{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}}
+
+.main-stat-number {{
+  font-size: 3rem;
+  font-weight: 900;
   color: var(--primary);
   display: block;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }}
 
-.stat-label {{
+.main-stat-label {{
   color: var(--muted);
-  font-size: 0.9rem;
-  margin-top: 5px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }}
 
 .block-container {{
@@ -221,6 +240,13 @@ html, body, [data-testid="stAppViewContainer"] {{
   .price-value {{
     font-size: 1.5rem;
   }}
+  .main-stat-card {{
+    padding: 30px;
+    margin: 20px auto;
+  }}
+  .main-stat-number {{
+    font-size: 2.5rem;
+  }}
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -229,7 +255,6 @@ html, body, [data-testid="stAppViewContainer"] {{
 # FUNÇÕES
 # =========================
 DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=1318008819&single=true&output=csv"
-# URL da segunda aba com o GID correto
 ECONOMIA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRLw7a1zV4lrN7q3JbKwKJbOjZ-dzPm3jc1MkFLL6ZfZ1F_B31kve_bDRNsFdpZTDOsUhJMPyL74f9u/pub?gid=861060469&single=true&output=csv"
 
 def format_brl(x):
@@ -270,21 +295,19 @@ def load_from_google_sheets(url: str) -> pd.DataFrame:
 
 @st.cache_data(ttl=120)
 def load_economia_value() -> str:
-    """Carrega o valor de economia da segunda página da planilha (GID: 861060469)."""
     try:
         df_economia = load_from_google_sheets(ECONOMIA_URL)
         
-        # Verifica se a planilha tem dados
         if df_economia.empty:
             return "R$ 12,00"
         
-        # Primeira tentativa: procura pela célula A2 (linha 1, coluna 0 em índice pandas)
+        # Busca na célula A2
         if len(df_economia) >= 2 and len(df_economia.columns) >= 1:
-            valor_a2 = df_economia.iloc[1, 0]  # Linha 2 (índice 1), Coluna A (índice 0)
+            valor_a2 = df_economia.iloc[1, 0]
             if pd.notna(valor_a2) and str(valor_a2).strip():
                 return str(valor_a2).strip()
         
-        # Segunda tentativa: procura por coluna com "potencial" e "economia"
+        # Busca por coluna com "potencial" e "economia"
         for col in df_economia.columns:
             col_lower = str(col).lower().strip()
             if "potencial" in col_lower and "economia" in col_lower:
@@ -292,20 +315,9 @@ def load_economia_value() -> str:
                     if pd.notna(value) and str(value).strip():
                         return str(value).strip()
         
-        # Terceira tentativa: procura qualquer valor que pareça monetário
-        for _, row in df_economia.iterrows():
-            for value in row:
-                if pd.notna(value):
-                    value_str = str(value).strip()
-                    if ("R$" in value_str or 
-                        ("," in value_str and any(c.isdigit() for c in value_str)) or
-                        (value_str.replace(",", "").replace(".", "").isdigit() and len(value_str) > 2)):
-                        return value_str
-        
         return "R$ 12,00"
         
-    except Exception as e:
-        # Retorna valor padrão em caso de erro
+    except Exception:
         return "R$ 12,00"
 
 def padronizar_colunas(df: pd.DataFrame) -> pd.DataFrame:
@@ -403,6 +415,7 @@ try:
     df = padronizar_colunas(df_raw)
     df_original = df.copy()
     st.success("✅ Dados carregados com sucesso!")
+    st.info("💡 Os preços listados são referenciais obtidos através de cotações. Entre em contato com seu representante comercial para confirmar disponibilidade e condições especiais.")
 except Exception as e:
     st.error(f"❌ Erro ao processar dados: {e}")
     st.write("Colunas encontradas:", list(df_raw.columns))
@@ -427,32 +440,13 @@ df = deduplicar(df, modo_dup)
 # Carrega valor de economia da segunda página
 valor_economia = load_economia_value()
 
-# APENAS 3 CARDS: Produtos, Fornecedores, Potencial de Economia
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.markdown(f"""
-    <div class="stat-card">
-        <span class="stat-number">{len(df)}</span>
-        <div class="stat-label">Produtos</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    fornecedores_unicos = df['Fornecedor'].nunique()
-    st.markdown(f"""
-    <div class="stat-card">
-        <span class="stat-number">{fornecedores_unicos}</span>
-        <div class="stat-label">Fornecedores</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    st.markdown(f"""
-    <div class="stat-card">
-        <span class="stat-number">{valor_economia}</span>
-        <div class="stat-label">Potencial de Economia</div>
-    </div>
-    """, unsafe_allow_html=True)
+# CARD PRINCIPAL CENTRALIZADO - POTENCIAL DE ECONOMIA
+st.markdown(f"""
+<div class="main-stat-card">
+    <span class="main-stat-number">{valor_economia}</span>
+    <div class="main-stat-label">Potencial de Economia</div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown('<div class="search-container">', unsafe_allow_html=True)
 busca = st.text_input("🔍 Pesquisar produto", placeholder="Digite o nome do produto (ex: Farinha, Açúcar...)")
