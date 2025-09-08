@@ -9,7 +9,7 @@ import streamlit as st
 # =========================
 st.set_page_config(
     page_title="TOP Preços", 
-    page_icon="🔥", 
+    page_icon="🏆", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -461,7 +461,7 @@ def render_cards_mobile(df_view: pd.DataFrame):
 
 st.markdown("""
 <div class="main-header">
-    <h1>🔥 TOP Preços</h1>
+    <h1>🏆 TOP Preços</h1>
     <div class="subtitle">Os melhores preços de panificação toda segunda-feira</div>
 </div>
 """, unsafe_allow_html=True)
