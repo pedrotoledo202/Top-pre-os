@@ -14,15 +14,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Paleta alaranjada harmoniosa com fundo escuro
-PRIMARY = "#FF8C42"
-SECONDARY = "#FFB366"
-ACCENT = "#FFA726"
-BG = "#1C1C1C"
-CARD = "#2A2A2A"
-TEXT = "#FFFFFF"
-MUTED = "#B0B0B0"
-ECONOMY = "#FF7043"
+# Paleta baseada na logo: azuis e verdes
+PRIMARY = "#4A90A4"      # Azul principal da logo
+SECONDARY = "#5BA05B"    # Verde da logo  
+ACCENT = "#6BB6FF"       # Azul mais claro
+BG = "#1C1C1C"           # Fundo escuro mantido
+CARD = "#2A2A2A"         # Cards em cinza escuro
+TEXT = "#FFFFFF"         # Texto branco
+MUTED = "#B0B0B0"        # Texto mais suave
+ECONOMY = "#4CAF50"      # Verde para economia
 
 # CSS otimizado para mobile
 st.markdown(f"""
@@ -52,7 +52,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   border-radius: 15px;
   margin-bottom: 25px;
   text-align: center;
-  box-shadow: 0 2px 15px rgba(255, 179, 102, 0.15);
+  box-shadow: 0 2px 15px rgba(74, 144, 164, 0.15);
 }}
 
 .main-header h1 {{
@@ -75,7 +75,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   padding: 20px;
   border-radius: 15px;
   margin-bottom: 25px;
-  border: 1px solid rgba(255, 140, 66, 0.15);
+  border: 1px solid rgba(74, 144, 164, 0.15);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }}
 
@@ -91,7 +91,7 @@ html, body, [data-testid="stAppViewContainer"] {{
 
 .stTextInput > div > div > input:focus {{
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(107, 182, 255, 0.2) !important;
   outline: none !important;
 }}
 
@@ -100,7 +100,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   border-radius: 12px;
   padding: 20px;
   margin: 15px 0;
-  border: 1px solid rgba(255, 140, 66, 0.2);
+  border: 1px solid rgba(74, 144, 164, 0.2);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   position: relative;
@@ -119,7 +119,7 @@ html, body, [data-testid="stAppViewContainer"] {{
 
 .product-card:hover {{
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.4);
+  box-shadow: 0 4px 15px rgba(74, 144, 164, 0.4);
   border-color: var(--primary);
 }}
 
@@ -138,14 +138,14 @@ html, body, [data-testid="stAppViewContainer"] {{
 }}
 
 .supplier-label {{
-  background: rgba(255, 140, 66, 0.15);
+  background: rgba(74, 144, 164, 0.15);
   color: var(--primary);
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 0.85rem;
   font-weight: 600;
   margin-right: 10px;
-  border: 1px solid rgba(255, 140, 66, 0.3);
+  border: 1px solid rgba(74, 144, 164, 0.3);
 }}
 
 .supplier-name {{
@@ -158,7 +158,7 @@ html, body, [data-testid="stAppViewContainer"] {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 140, 66, 0.1);
+  background: rgba(74, 144, 164, 0.1);
   padding: 15px;
   border-radius: 12px;
   margin-top: 15px;
@@ -172,7 +172,7 @@ html, body, [data-testid="stAppViewContainer"] {{
 }}
 
 .check-badge {{
-  background: #28a745;
+  background: var(--economy);
   color: white;
   padding: 5px 10px;
   border-radius: 12px;
@@ -189,8 +189,8 @@ html, body, [data-testid="stAppViewContainer"] {{
   padding: 40px;
   border-radius: 20px;
   text-align: center;
-  border: 2px solid rgba(255, 140, 66, 0.3);
-  box-shadow: 0 8px 25px rgba(255, 140, 66, 0.15);
+  border: 2px solid rgba(74, 144, 164, 0.3);
+  box-shadow: 0 8px 25px rgba(74, 144, 164, 0.15);
   margin: 30px auto;
   max-width: 400px;
   position: relative;
@@ -224,9 +224,70 @@ html, body, [data-testid="stAppViewContainer"] {{
   letter-spacing: 1px;
 }}
 
+/* Tabela melhorada para mobile */
+.stDataFrame {{
+  font-size: 0.9rem !important;
+}}
+
+.stDataFrame table {{
+  background: var(--card) !important;
+  border-radius: 15px !important;
+  overflow: hidden !important;
+}}
+
+.stDataFrame th {{
+  background: var(--primary) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 10px !important;
+  text-align: center !important;
+}}
+
+.stDataFrame td {{
+  padding: 12px 10px !important;
+  border-bottom: 1px solid rgba(74, 144, 164, 0.1) !important;
+  text-align: center !important;
+}}
+
+/* Sidebar customizada */
+[data-testid="stSidebar"] {{
+  background: var(--card) !important;
+  border-right: 1px solid rgba(74, 144, 164, 0.1) !important;
+}}
+
+/* Selectbox e inputs da sidebar */
+.stSelectbox > div > div {{
+  background: var(--bg) !important;
+  border: 1px solid var(--primary) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+}}
+
+/* Botões */
+.stButton > button {{
+  background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 25px !important;
+  padding: 12px 25px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}}
+
+.stButton > button:hover {{
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 15px rgba(74, 144, 164, 0.3) !important;
+}}
+
 .block-container {{
   padding: 20px !important;
   max-width: 100% !important;
+}}
+
+/* Loading e mensagens */
+.stAlert {{
+  border-radius: 15px !important;
+  border-left: 4px solid var(--primary) !important;
 }}
 
 @media (max-width: 768px) {{
